@@ -354,11 +354,14 @@
         android:layout_marginBottom="5pt">
 
         <TextView
+            android:id="@+id/teste"
+            android:textColor="@color/colorWhite"
             android:layout_width="0pt"
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
 
         <ImageButton
+            android:id="@+id/btnUpdate"
             android:layout_width="0pt"
             android:layout_height="30pt"
             android:layout_weight="1"
@@ -367,13 +370,15 @@
             android:scaleType="fitCenter"/>
 
         <TextView
+            android:id="@+id/teste2"
             android:layout_width="0pt"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
     </LinearLayout>
 
     <TextView
+        android:id="@+id/outTeste"
         android:text="Últimos preços"
         android:textAlignment="center"
         android:textColor="@color/colorWhite"
@@ -413,11 +418,29 @@
 
     </LinearLayout>
 
-    <ListView
-        android:id="@+id/lista"
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_marginLeft="5pt"
         android:layout_marginRight="5pt"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"></ListView>
+        android:layout_height="wrap_content">
+
+        <ListView
+            android:id="@+id/listaBit"
+            android:layout_width="0pt"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+        <ListView
+            android:id="@+id/listaLit"
+            android:layout_width="0pt"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+        <ListView
+            android:id="@+id/listaBCash"
+            android:layout_width="0pt"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
 
 </LinearLayout>
