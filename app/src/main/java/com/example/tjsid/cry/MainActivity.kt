@@ -1,6 +1,8 @@
 package com.example.tjsid.cry
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -168,7 +170,7 @@ class MainActivity : AppCompatActivity() {
         val canVibrate: Boolean = vibrator.hasVibrator()
 
         if (canVibrate) {
-            var milliseconds: Long = 100
+            var milliseconds: Long = 50
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 // void vibrate (VibrationEffect vibe)
                 vibrator.vibrate(
@@ -233,8 +235,17 @@ class MainActivity : AppCompatActivity() {
 
             //coloca as informações nas linhas
             val viewHolder = rowMain.tag as ViewHolder
-            var index = mLastPrices.size
             viewHolder.value.text = "${mLastPrices[(mLastPrices.size-1)-position]}"
+
+            if((mLastPrices.size-2)-position != -1){
+                if(mLastPrices[(mLastPrices.size-1)-position] > mLastPrices[(mLastPrices.size-2)-position]){
+                    viewHolder.value.setTextColor(Color.CYAN)
+                } else if (mLastPrices[(mLastPrices.size-1)-position] < mLastPrices[(mLastPrices.size-2)-position]) {
+                    viewHolder.value.setTextColor(Color.RED)
+                } else if (mLastPrices[(mLastPrices.size-1)-position] == mLastPrices[(mLastPrices.size-2)-position]){
+                    viewHolder.value.setTextColor(Color.YELLOW)
+                }
+            }
 
             return rowMain
         }
