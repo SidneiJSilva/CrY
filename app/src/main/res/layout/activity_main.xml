@@ -429,11 +429,13 @@
             android:id="@+id/listaBit"
             android:layout_width="0pt"
             android:layout_height="wrap_content"
+            android:layout_marginRight="1dp"
             android:layout_weight="1"/>
         <ListView
             android:id="@+id/listaLit"
             android:layout_width="0pt"
             android:layout_height="wrap_content"
+            android:layout_marginRight="1dp"
             android:layout_weight="1"/>
         <ListView
             android:id="@+id/listaBCash"
