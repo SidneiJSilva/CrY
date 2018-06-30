@@ -8,15 +8,8 @@
     android:orientation="vertical"
     tools:context="com.example.tjsid.cry.MainActivity">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Criptomoedas"
-        android:textAlignment="center"
-        android:textColor="@color/colorWhite"
-        android:textSize="30dp" />
-
     <LinearLayout
+        android:layout_marginTop="25dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

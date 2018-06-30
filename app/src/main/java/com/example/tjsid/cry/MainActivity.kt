@@ -2,7 +2,9 @@ package com.example.tjsid.cry
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -16,7 +18,9 @@ import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
+import com.example.tjsid.cry.Constants.ValuesConstants
 import com.example.tjsid.cry.Date.Dates
+import com.example.tjsid.cry.Repository.ValueRepository
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import com.google.gson.JsonDeserializer
@@ -47,25 +51,27 @@ class MainActivity : AppCompatActivity() {
         val listViewLit = findViewById<ListView>(R.id.listaLit)
         val listViewBCash = findViewById<ListView>(R.id.listaBCash)
 
-        var date = Dates()
+        val date: Dates = Dates.getInstance(this)
 
         //inicializa os campos quando o APP é aberto
         get(basicUrl + urlBit)
         get(basicUrl + urlLit)
         get(basicUrl + urlBCash)
         down_bar.text = "Última atualização " + date.getAllHour()
+        listViewBit.adapter = MyCustomAdapter(this, getLastPrice(urlBit, this))
+        listViewLit.adapter = MyCustomAdapter(this, getLastPrice(urlLit, this))
+        listViewBCash.adapter = MyCustomAdapter(this, getLastPrice(urlBCash, this))
+//        teste.text = date.getDate()
 
         btnUpdate.setOnClickListener {
             vibrator()
             get(basicUrl + urlBit)
             get(basicUrl + urlLit)
             get(basicUrl + urlBCash)
-
             down_bar.text = "Última atualização " + date.getAllHour()
-            //para BTC
-            listViewBit.adapter = MyCustomAdapter(this, getLastPrice(urlBit))
-            listViewLit.adapter = MyCustomAdapter(this, getLastPrice(urlLit))
-            listViewBCash.adapter = MyCustomAdapter(this, getLastPrice(urlBCash))
+            listViewBit.adapter = MyCustomAdapter(this, getLastPrice(urlBit, this))
+            listViewLit.adapter = MyCustomAdapter(this, getLastPrice(urlLit, this))
+            listViewBCash.adapter = MyCustomAdapter(this, getLastPrice(urlBCash, this))
 
         }
     }
@@ -87,25 +93,26 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    private fun getLastPrice(str: String): ArrayList<String> {
-        if(str == "BTC/ticker/"){
-            lastPricesBit.add(btcUltimoPreco.text.toString())
-            return lastPricesBit
-        } else if(str == "LTC/ticker/"){
-            lastPricesLit.add(ltcUltimoPreco.text.toString())
-            return lastPricesLit
-        } else if(str == "BCH/ticker/"){
-            lastPricesBcash.add(bchUltimoPreco.text.toString())
-            return lastPricesBcash
+    private fun getLastPrice(str: String, context: Context): ArrayList<String> {
+
+        val dados: ValueRepository = ValueRepository.getInstance(context)
+
+        if (str == "BTC/ticker/") {
+            return dados.get(20, ValuesConstants.TYPE.BTC)
+        } else if (str == "LTC/ticker/") {
+            return dados.get(20, ValuesConstants.TYPE.LTC)
+        } else if (str == "BCH/ticker/") {
+            return dados.get(20, ValuesConstants.TYPE.BCH)
+        } else {
+            var default: ArrayList<String> = ArrayList()
+            default.add("Sem valor")
+            return default
         }
-        var default: ArrayList<String> = ArrayList()
-        default.add("Sem valor")
-        return default
 
     }
 
     private fun deserializacao(str: String, typeUrl: String) {
-        putInFields(str, typeUrl)
+        putInFields(str, typeUrl, this)
     }
 
     private fun getRightJason(str: String): String {
@@ -127,7 +134,10 @@ class MainActivity : AppCompatActivity() {
         return rightJson
     }
 
-    private fun putInFields(str: String, typeUrl: String) {
+    private fun putInFields(str: String, typeUrl: String, context: Context) {
+
+        val date: Dates = Dates.getInstance(context)
+        val dados: ValueRepository = ValueRepository.getInstance(context)
 
         if (typeUrl == "https://www.mercadobitcoin.net/api/BTC/ticker/") {
 
@@ -140,6 +150,8 @@ class MainActivity : AppCompatActivity() {
             var lastPrice = ("%.2f".format(values.getString("last").toFloat())).toString()
             btcUltimoPreco.text = lastPrice
 
+            dados.insert(lastPrice, date.getAllHour(), date.getDate(),ValuesConstants.TYPE.BTC)
+
         }
         if (typeUrl == "https://www.mercadobitcoin.net/api/LTC/ticker/") {
 
@@ -149,7 +161,11 @@ class MainActivity : AppCompatActivity() {
             ltcVCompraValor.text = ("%.2f".format(values.getString("buy").toFloat())).toString()
             ltcValorVenda.text = ("%.2f".format(values.getString("sell").toFloat())).toString()
             ltcVolume.text = ("%.2f".format(values.getString("vol").toFloat())).toString()
-            ltcUltimoPreco.text = ("%.2f".format(values.getString("last").toFloat())).toString()
+            var lastPrice = ("%.2f".format(values.getString("last").toFloat())).toString()
+            ltcUltimoPreco.text = lastPrice
+
+            dados.insert(lastPrice, date.getAllHour(), date.getDate(), ValuesConstants.TYPE.LTC)
+
         }
         if (typeUrl == "https://www.mercadobitcoin.net/api/BCH/ticker/") {
 
@@ -159,7 +175,11 @@ class MainActivity : AppCompatActivity() {
             bchVCompraValor.text = ("%.2f".format(values.getString("buy").toFloat())).toString()
             bchValorVenda.text = ("%.2f".format(values.getString("sell").toFloat())).toString()
             bchVolume.text = ("%.2f".format(values.getString("vol").toFloat())).toString()
-            bchUltimoPreco.text = ("%.2f".format(values.getString("last").toFloat())).toString()
+            var lastPrice = ("%.2f".format(values.getString("last").toFloat())).toString()
+            bchUltimoPreco.text = lastPrice
+
+            dados.insert(lastPrice, date.getAllHour(), date.getDate(), ValuesConstants.TYPE.BCH)
+
         }
     }
 
@@ -235,16 +255,17 @@ class MainActivity : AppCompatActivity() {
 
             //coloca as informações nas linhas
             val viewHolder = rowMain.tag as ViewHolder
-            viewHolder.value.text = "${mLastPrices[(mLastPrices.size-1)-position]}"
+            viewHolder.value.text = "${mLastPrices[position]}"
 
-            if((mLastPrices.size-2)-position != -1){
-                if(mLastPrices[(mLastPrices.size-1)-position] > mLastPrices[(mLastPrices.size-2)-position]){
-                    viewHolder.value.setTextColor(Color.CYAN)
-                } else if (mLastPrices[(mLastPrices.size-1)-position] < mLastPrices[(mLastPrices.size-2)-position]) {
-                    viewHolder.value.setTextColor(Color.RED)
-                } else if (mLastPrices[(mLastPrices.size-1)-position] == mLastPrices[(mLastPrices.size-2)-position]){
-                    viewHolder.value.setTextColor(Color.YELLOW)
+            if (position == mLastPrices.size - 1) {
+                viewHolder.value.setTextColor(Color.YELLOW)
+            } else {
+                when {
+                    mLastPrices [position] > mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.CYAN)
+                    mLastPrices[position] < mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.RED)
+                    mLastPrices[position] == mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.YELLOW)
                 }
+
             }
 
             return rowMain
