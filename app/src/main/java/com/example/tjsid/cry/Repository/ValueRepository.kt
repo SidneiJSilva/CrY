@@ -23,7 +23,43 @@ class ValueRepository private constructor(context: Context) {
         private var INSTANCE: ValueRepository? = null
     }
 
-    fun get(index: Int, type: String): ArrayList<String> {
+    fun getDates(index: Int): ArrayList<String> {
+
+        var dados: ArrayList<String> = ArrayList()
+
+        try {
+
+            val cursor: Cursor
+
+            val db = mDataBaseHelper.readableDatabase
+
+            var sql = "select ${ValuesConstants.VALUE.DATE}, ${ValuesConstants.VALUE.HOUR} from ${ValuesConstants.VALUE.TABLE_NAME} " +
+                    "where ${ValuesConstants.VALUE.TYPE} = '${ValuesConstants.TYPE.BTC}' " +
+                    "order by ${ValuesConstants.VALUE.ID} desc limit $index"
+
+            cursor = db.rawQuery(sql, null)
+
+            if (cursor.count > 0) {
+                cursor.moveToFirst()
+                while (cursor.count > 0) {
+                    val valueDate = cursor.getString(cursor.getColumnIndex(ValuesConstants.VALUE.DATE))
+                    val valueHour = cursor.getString(cursor.getColumnIndex(ValuesConstants.VALUE.HOUR))
+                    dados.add("$valueDate - $valueHour")
+                    cursor.moveToNext()
+                }
+            }else{
+                dados.add("-/-/- - 00:00:00")
+            }
+
+            cursor.close()
+
+        } catch (e: Exception) {
+            return dados
+        }
+        return dados
+    }
+
+    fun getValues(index: Int, type: String): ArrayList<String> {
 
         var valueEntity: ValueEntity? = null
         var dados: ArrayList<String> = ArrayList()
@@ -43,10 +79,7 @@ class ValueRepository private constructor(context: Context) {
             if (cursor.count > 0) {
                 cursor.moveToFirst()
                 while (cursor.count > 0) {
-//                    val valueID = cursor.getInt(cursor.getColumnIndex(ValuesConstants.VALUE.ID))
                     val valueLastPrice = cursor.getString(cursor.getColumnIndex(ValuesConstants.VALUE.LAST_PRICE))
-//                    val valueHour = cursor.getString(cursor.getColumnIndex(ValuesConstants.VALUE.HOUR))
-                    val valueDate = cursor.getString(cursor.getColumnIndex(ValuesConstants.VALUE.DATE))
                     dados.add(valueLastPrice)
                     cursor.moveToNext()
                 }

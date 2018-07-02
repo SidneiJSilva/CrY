@@ -33,15 +33,10 @@ import java.text.NumberFormat
 
 class MainActivity : AppCompatActivity() {
 
-    var lastPricesBit: ArrayList<String> = ArrayList()
-    var lastPricesLit: ArrayList<String> = ArrayList()
-    var lastPricesBcash: ArrayList<String> = ArrayList()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        var lastBit = ArrayList<String>()
         val basicUrl = "https://www.mercadobitcoin.net/api/"
         val urlBit = "BTC/ticker/"
         val urlLit = "LTC/ticker/"
@@ -50,6 +45,7 @@ class MainActivity : AppCompatActivity() {
         val listViewBit = findViewById<ListView>(R.id.listaBit)
         val listViewLit = findViewById<ListView>(R.id.listaLit)
         val listViewBCash = findViewById<ListView>(R.id.listaBCash)
+        val listViewDates = findViewById<ListView>(R.id.listaDate)
 
         val date: Dates = Dates.getInstance(this)
 
@@ -58,10 +54,10 @@ class MainActivity : AppCompatActivity() {
         get(basicUrl + urlLit)
         get(basicUrl + urlBCash)
         down_bar.text = "Última atualização " + date.getAllHour()
-        listViewBit.adapter = MyCustomAdapter(this, getLastPrice(urlBit, this))
-        listViewLit.adapter = MyCustomAdapter(this, getLastPrice(urlLit, this))
-        listViewBCash.adapter = MyCustomAdapter(this, getLastPrice(urlBCash, this))
-//        teste.text = date.getDate()
+        listViewBit.adapter = MyCustomAdapter(this, getLastPrice(urlBit, this), "bitcoin")
+        listViewLit.adapter = MyCustomAdapter(this, getLastPrice(urlLit, this), "litcoin")
+        listViewBCash.adapter = MyCustomAdapter(this, getLastPrice(urlBCash, this), "bcash")
+        listViewDates.adapter = MyCustomAdapter(this, getLastDate(this), "date")
 
         btnUpdate.setOnClickListener {
             vibrator()
@@ -69,10 +65,10 @@ class MainActivity : AppCompatActivity() {
             get(basicUrl + urlLit)
             get(basicUrl + urlBCash)
             down_bar.text = "Última atualização " + date.getAllHour()
-            listViewBit.adapter = MyCustomAdapter(this, getLastPrice(urlBit, this))
-            listViewLit.adapter = MyCustomAdapter(this, getLastPrice(urlLit, this))
-            listViewBCash.adapter = MyCustomAdapter(this, getLastPrice(urlBCash, this))
-
+            listViewBit.adapter = MyCustomAdapter(this, getLastPrice(urlBit, this), "bitcoin")
+            listViewLit.adapter = MyCustomAdapter(this, getLastPrice(urlLit, this), "litcoin")
+            listViewBCash.adapter = MyCustomAdapter(this, getLastPrice(urlBCash, this), "bcash")
+            listViewDates.adapter = MyCustomAdapter(this, getLastDate(this), "date")
         }
     }
 
@@ -98,17 +94,22 @@ class MainActivity : AppCompatActivity() {
         val dados: ValueRepository = ValueRepository.getInstance(context)
 
         if (str == "BTC/ticker/") {
-            return dados.get(20, ValuesConstants.TYPE.BTC)
+            return dados.getValues(30, ValuesConstants.TYPE.BTC)
         } else if (str == "LTC/ticker/") {
-            return dados.get(20, ValuesConstants.TYPE.LTC)
+            return dados.getValues(30, ValuesConstants.TYPE.LTC)
         } else if (str == "BCH/ticker/") {
-            return dados.get(20, ValuesConstants.TYPE.BCH)
+            return dados.getValues(30, ValuesConstants.TYPE.BCH)
         } else {
             var default: ArrayList<String> = ArrayList()
             default.add("Sem valor")
             return default
         }
 
+    }
+
+    private fun getLastDate(context: Context): ArrayList<String> {
+        val dados: ValueRepository = ValueRepository.getInstance(context)
+        return dados.getDates(30)
     }
 
     private fun deserializacao(str: String, typeUrl: String) {
@@ -150,7 +151,7 @@ class MainActivity : AppCompatActivity() {
             var lastPrice = ("%.2f".format(values.getString("last").toFloat())).toString()
             btcUltimoPreco.text = lastPrice
 
-            dados.insert(lastPrice, date.getAllHour(), date.getDate(),ValuesConstants.TYPE.BTC)
+            dados.insert(lastPrice, date.getAllHour(), date.getDate(), ValuesConstants.TYPE.BTC)
 
         }
         if (typeUrl == "https://www.mercadobitcoin.net/api/LTC/ticker/") {
@@ -208,14 +209,16 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    class MyCustomAdapter(context: Context, lastPrices: ArrayList<String>) : BaseAdapter() {
+    class MyCustomAdapter(context: Context, lastPrices: ArrayList<String>, type: String) : BaseAdapter() {
 
         private val mContext: Context
         private val mLastPrices: ArrayList<String>
+        private val mType: String
 
         init {
             mContext = context
             mLastPrices = lastPrices
+            mType = type
         }
 
         //determina quantas linhas vai ter a lista
@@ -257,15 +260,19 @@ class MainActivity : AppCompatActivity() {
             val viewHolder = rowMain.tag as ViewHolder
             viewHolder.value.text = "${mLastPrices[position]}"
 
-            if (position == mLastPrices.size - 1) {
-                viewHolder.value.setTextColor(Color.YELLOW)
-            } else {
-                when {
-                    mLastPrices [position] > mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.CYAN)
-                    mLastPrices[position] < mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.RED)
-                    mLastPrices[position] == mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.YELLOW)
-                }
+            if(mType == "date"){
 
+            }else{
+                if (position == mLastPrices.size - 1) {
+                    viewHolder.value.setTextColor(Color.YELLOW)
+                } else {
+                    when {
+                        mLastPrices[position] > mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.GREEN)
+                        mLastPrices[position] < mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.RED)
+                        mLastPrices[position] == mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.YELLOW)
+                    }
+
+                }
             }
 
             return rowMain

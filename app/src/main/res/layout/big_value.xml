@@ -7,7 +7,7 @@
         android:id="@+id/txt_big_value"
         android:textAlignment="center"
         android:text="Sidnei"
-        android:background="@color/colorDarkMoreOrange"
+        android:textSize="5pt"
         android:textColor="@color/colorWhite"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
