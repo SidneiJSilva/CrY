@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
 
         val basicUrl = "https://www.mercadobitcoin.net/api/"
         val urlBit = "BTC/ticker/"
@@ -83,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
                 }, Response.ErrorListener {
 
-            Toast.makeText(this, "Something was wrong", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Dados não recebidos. Verificar conexão.", Toast.LENGTH_LONG).show()
         })
         que.add(req)
 
@@ -260,24 +261,23 @@ class MainActivity : AppCompatActivity() {
             val viewHolder = rowMain.tag as ViewHolder
             viewHolder.value.text = "${mLastPrices[position]}"
 
-            if(mType == "date"){
+            if (mType == "date") {
 
-            }else{
+            } else {
                 if (position == mLastPrices.size - 1) {
                     viewHolder.value.setTextColor(Color.YELLOW)
+                } else if (mLastPrices.max() == mLastPrices[position]) {
+                    viewHolder.value.setTextColor(Color.CYAN)
                 } else {
                     when {
                         mLastPrices[position] > mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.GREEN)
                         mLastPrices[position] < mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.RED)
                         mLastPrices[position] == mLastPrices[position + 1] -> viewHolder.value.setTextColor(Color.YELLOW)
                     }
-
                 }
             }
-
             return rowMain
         }
-
         private class ViewHolder(val value: TextView)
 
     }
